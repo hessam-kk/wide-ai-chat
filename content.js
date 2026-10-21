@@ -4,8 +4,7 @@ const host = location.hostname;
 const SEL = 'div, section, article, ul, ol, p, pre';
 let pct = 90; // 0 = off (stock layout)
 let widths = {};
-const touched = new Set();
-const trimmed = new Set();
+const touched = new Set(); // already handled: skip on rescan
 
 // A column is a box whose own max-width cap is what binds its width, and
 // (unless `centered` is off) sits centered inside its parent.
@@ -17,34 +16,60 @@ function isColumn(mw, r, parent, vw, centered = true) {
   return !!parent && Math.abs((r.left + r.right) / 2 - (parent.left + parent.right) / 2) < 48;
 }
 
-function trim(el) {
-  el.style.setProperty('padding-left', '16px', 'important');
-  el.style.setProperty('padding-right', '16px', 'important');
-  trimmed.add(el);
-}
-
-function widen(el, cs, isCol) {
-  el.style.setProperty('max-width', pct + 'vw', 'important');
-  // fat horizontal padding is the other half of the gap on some layouts
-  if (parseFloat(cs.paddingLeft) > 20) trim(el);
-  touched.add(el);
-  if (isCol) el.dataset.wideCol = '1'; // marks a chat column for the loose pass below
-}
-
-// Fallback anchor for threads that are not centred (DeepSeek aligns it left).
-let widest = null;
-
 // Centred by equal padding on both sides rather than a cap — DeepSeek pads with
 // calc((100% - var(--message-list-max-width)) / 2) and sets no max-width at all.
 function isPaddedBand(pad, padR, r, vw) {
   return pad > 40 && Math.abs(pad - padR) < 8 && r.width - pad - padR < vw * 0.9 && r.height > 200;
 }
 
+// Overrides live in one constructed stylesheet keyed by a data attribute, never
+// in element inline styles: sites rewrite their own inline padding from JS
+// (DeepSeek does, on every re-render), so a snapshot of it goes stale and reset
+// would restore the wrong thing. A sheet we can drop always leaves stock layout.
+function mark(el, token) {
+  const now = el.dataset.wc || '';
+  if (!now.split(' ').includes(token)) el.dataset.wc = now ? `${now} ${token}` : token;
+}
+
+let sheet = null;
+function paint() {
+  if (!pct) {
+    if (!sheet) return;
+    document.adoptedStyleSheets = document.adoptedStyleSheets.filter((s) => s !== sheet);
+    sheet = null;
+    return;
+  }
+  if (!sheet) {
+    sheet = new CSSStyleSheet();
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+  }
+  sheet.replaceSync(
+    `[data-wc~="w"]{max-width:${pct}vw!important}` +
+      `[data-wc~="pad"]{padding-inline:16px!important}` +
+      `[data-wc~="auto"]{width:auto!important}`,
+  );
+}
+
+function trim(el) {
+  mark(el, 'pad');
+}
+
+function widen(el, cs, isCol) {
+  mark(el, 'w');
+  // fat horizontal padding is the other half of the gap on some layouts
+  if (parseFloat(cs.paddingLeft) > 20) trim(el);
+  touched.add(el);
+  if (isCol) mark(el, 'col'); // marks a chat column for the loose pass below
+}
+
+// Fallback anchor for threads that are not centred (DeepSeek aligns it left).
+let widest = null;
+
 function check(el) {
   if (!pct || touched.has(el)) return;
   // Inside a known column a cap is that turn's own gutter, and such turns are
   // offset from the column by an avatar gutter, so they are not centered.
-  const inside = !!el.parentElement?.closest('[data-wide-col]');
+  const inside = !!el.parentElement?.closest('[data-wc~="col"]');
   const p = el.parentElement;
   const cs = getComputedStyle(el);
   const r = el.getBoundingClientRect();
@@ -55,7 +80,7 @@ function check(el) {
   const pad = parseFloat(cs.paddingLeft);
   if (isPaddedBand(pad, parseFloat(cs.paddingRight), r, vw)) {
     trim(el);
-    if (r.height > 300) el.dataset.wideCol = '1'; // it is the content band: loosen below it
+    if (r.height > 300) mark(el, 'col'); // it is the content band: loosen below it
     return;
   }
 
@@ -67,7 +92,7 @@ function check(el) {
   // A fixed px width caps just as hard, it just lives in `width`, not `max-width`.
   const w = parseFloat(cs.width);
   if (w >= 320 && w < vw * 0.98 && Math.abs(r.width - w) <= 60) {
-    el.style.setProperty('width', 'auto', 'important');
+    mark(el, 'auto');
     widen(el, cs, false);
   }
 }
@@ -75,7 +100,7 @@ function check(el) {
 function settle() {
   const root = document.body;
   if (!pct || !root || !widest || !widest.el.isConnected) return;
-  if (!root.querySelector('[data-wide-col]')) widen(widest.el, widest.cs, true);
+  if (!root.querySelector('[data-wc~="col"]')) widen(widest.el, widest.cs, true);
 }
 
 function scan() {
@@ -112,21 +137,16 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
     reply({ host, pct });
   } else if (msg.type === 'set') {
     pct = widths[host] = Math.min(100, Math.max(60, +msg.pct || 90));
-    for (const el of touched) el.style.setProperty('max-width', pct + 'vw', 'important');
+    paint();
     scan();
     persist();
     reply({ pct });
   } else if (msg.type === 'reset') {
-    for (const el of [...touched, ...trimmed]) {
-      el.style.removeProperty('max-width');
-      el.style.removeProperty('width');
-      el.style.removeProperty('padding-left');
-      el.style.removeProperty('padding-right');
-      el.removeAttribute('data-wide-col');
-    }
+    widths[host] = pct = 0;
+    paint(); // drops the stylesheet: stock layout, nothing of the site's touched
     touched.clear();
-    trimmed.clear();
-    widths[host] = pct = 0; // keep the off state so rescans stay quiet
+    widest = null;
+    for (const el of document.querySelectorAll('[data-wc]')) el.removeAttribute('data-wc');
     persist();
     reply({ pct });
   }
@@ -141,6 +161,7 @@ const persist = () => {
 (async () => {
   ({ widths = {} } = await chrome.storage.sync.get('widths'));
   pct = widths[host] ?? 90;
+  paint();
   scan();
   setTimeout(scan, 900); // SPAs mount the thread late
   setTimeout(scan, 3000);
