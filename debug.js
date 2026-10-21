@@ -1,37 +1,37 @@
-// Debug dump — not used by the extension, just paste it into DevTools.
-//
-// On the Gemini tab: DevTools (Ctrl+Shift+J) → Elements panel → click the
-// paragraph of a message that stayed NARROW → back to Console → paste this.
-// It prints what the extension's detector sees for that element and every
-// ancestor, so we can tell which test rejects it. `copy()` leaves it on the
-// clipboard if the table is too wide to screenshot.
+// Debug dump — not used by the extension. Paste into the DevTools console on
+// the site that refuses to widen (no element-picking needed), then send the table.
+// Columns: what the detector reads, whether it would fire, and whether we
+// already touched the box (`ours`).
 (() => {
+  const vw = innerWidth;
   const rows = [];
-  for (let el = $0; el && el !== document.documentElement; el = el.parentElement) {
-    const cs = getComputedStyle(el);
+  for (const el of document.body.querySelectorAll('*')) {
+    if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE' || el.tagName === 'NOSCRIPT') continue;
     const r = el.getBoundingClientRect();
+    if (!r.width) continue;
+    const cs = getComputedStyle(el);
     const mw = parseFloat(cs.maxWidth);
+    const w = parseFloat(cs.width);
+    const pad = parseFloat(cs.paddingLeft) || 0;
+    const capped = mw >= 300 && mw < vw * 0.96;
+    const fixed = cs.display !== 'inline' && w >= 300 && w < vw * 0.96 && Math.abs(r.width - w) <= 60;
+    if (!capped && !fixed && pad < 40) continue;
     const p = el.parentElement?.getBoundingClientRect();
-    const name =
-      el.tagName.toLowerCase() +
-      (el.id ? '#' + el.id : '') +
-      (typeof el.className === 'string' && el.className.trim()
-        ? '.' + el.className.trim().split(/\s+/).slice(0, 3).join('.')
-        : '');
+    const cls = typeof el.className === 'string' ? el.className.trim().slice(0, 40) : '';
     rows.push({
-      el: name,
+      el: el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + (cls ? ' .' + cls.split(/\s+/).slice(0, 2).join('.') : ''),
       maxWidth: cs.maxWidth,
       width: cs.width,
-      flexBasis: cs.flexBasis,
       rectW: Math.round(r.width),
-      capBinds: Math.abs(r.width - mw) <= 60,
       h: Math.round(r.height),
-      offCenterPx: p ? Math.round((r.left + r.right) / 2 - (p.left + p.right) / 2) : null,
       padL: cs.paddingLeft,
-      ours: el.style.maxWidth || el.dataset.wideCol || '',
+      offCenter: p ? Math.round((r.left + r.right) / 2 - (p.left + p.right) / 2) : null,
+      capBinds: capped && Math.abs(r.width - mw) <= 60,
+      ours: el.dataset.wideCol || el.style.maxWidth || '',
     });
   }
-  console.table(rows);
+  rows.sort((a, b) => b.rectW - a.rectW);
+  console.table(rows.slice(0, 80));
   copy(rows);
   return rows;
 })();
