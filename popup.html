@@ -1,22 +1,121 @@
 <!doctype html>
+<html lang="en">
 <meta charset="utf-8">
 <style>
-  :root { color-scheme: light dark; }
-  body { width: 250px; margin: 0; padding: 14px 16px 16px; font: 13px/1.4 system-ui, sans-serif; }
-  header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-  #pct { font: 600 18px/1 ui-monospace, monospace; }
-  #host { margin-top: 2px; font-size: 11px; color: #888; overflow-wrap: anywhere; }
-  #range { width: 100%; margin: 12px 0 8px; accent-color: #10a37f; }
-  footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  #note { font-size: 11px; color: #888; }
-  label { display: flex; align-items: center; gap: 5px; font-size: 11px; white-space: nowrap;
-          cursor: pointer; opacity: .85; }
-  label:hover { opacity: 1; }
-  #on { margin: 0; accent-color: #10a37f; }
-  label:has(#on:disabled) { opacity: .4; cursor: default; }
+  :root {
+    color-scheme: light;
+    --paper: #f2f3f7;
+    --ink: #14161b;
+    --mute: #5f6473;
+    --line: #dee1e9;
+    --accent: #3e56f5;
+    --screen: #0f1117;
+    --screen-ink: #aab6ff;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    width: 288px; margin: 0; padding: 16px;
+    background: var(--paper); color: var(--ink);
+    font: 400 12px/1.35 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent); color: #fff; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  h1 {
+    margin: 0; font-size: 12.5px; font-weight: 620; letter-spacing: .015em;
+  }
+  #host {
+    font: 500 10.5px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+    color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 52%; text-align: right;
+  }
+
+  /* The hero: a scaled-down viewport, column and the gutters it reclaims. */
+  .stage {
+    position: relative; height: 104px; margin: 14px 0 0; overflow: hidden;
+    border-radius: 10px; background: var(--screen);
+    box-shadow: 0 1px 0 rgb(255 255 255 / .06) inset, 0 10px 24px -18px rgb(15 17 23 / .9);
+  }
+  .col {
+    position: absolute; inset: 0 auto 0 50%; transform: translateX(-50%);
+    width: 42%; display: flex; flex-direction: column; justify-content: center; gap: 7px;
+    padding: 0 9px; border-inline: 1px solid rgb(120 140 255 / .5);
+    transition: width .3s cubic-bezier(.16, 1, .3, 1), border-color .3s;
+  }
+  .col i { height: 3px; border-radius: 2px; background: #fff; opacity: .3; }
+  .col i:nth-child(1) { width: 88%; }
+  .col i:nth-child(2) { width: 100%; }
+  .col i:nth-child(3) { width: 62%; }
+  body.off .col { border-color: #3a4054; }
+  body.off .col i { opacity: .18; }
+
+  #pct {
+    position: absolute; top: 9px; right: 11px;
+    font: 600 11px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-variant-numeric: tabular-nums; color: var(--screen-ink);
+  }
+  #pct.off { color: #7f8ac4; }
+
+  #range {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 22px; margin: 12px 0 0; background: none; cursor: pointer;
+  }
+  #range::-webkit-slider-runnable-track {
+    height: 2px; border-radius: 2px;
+    background: linear-gradient(to right, var(--accent) var(--fill, 86%), var(--line) var(--fill, 86%));
+  }
+  #range::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 4px; height: 20px; margin-top: -9px;
+    border: 0; border-radius: 2px; background: var(--ink);
+    box-shadow: 0 0 0 4px var(--paper);
+  }
+  #range:disabled { cursor: default; }
+  #range:disabled::-webkit-slider-runnable-track { background: var(--line); }
+  #range:disabled::-webkit-slider-thumb { background: #b9bdc9; }
+
+  footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
+  #note { font-size: 11px; color: var(--mute); }
+
+  .switch { position: relative; display: flex; align-items: center; gap: 7px; cursor: pointer; user-select: none; }
+  .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .track {
+    position: relative; width: 30px; height: 18px; border-radius: 9px;
+    background: #c9ccd7; transition: background .2s cubic-bezier(.16, 1, .3, 1);
+  }
+  .track::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+    border-radius: 50%; background: #fff;
+    box-shadow: 0 1px 2px rgb(20 22 27 / .35);
+    transition: transform .22s cubic-bezier(.16, 1, .3, 1);
+  }
+  .switch input:checked + .track { background: var(--accent); }
+  .switch input:checked + .track::after { transform: translateX(12px); }
+  .switch input:focus-visible + .track { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .switch input:disabled + .track { opacity: .45; }
+  .switch b { font-weight: 500; font-size: 11px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 1ms !important; }
+  }
 </style>
-<header><strong>Wide Chat</strong><span id="pct">off</span></header>
-<div id="host"></div>
-<input id="range" type="range" min="30" max="100" step="1" value="90">
-<footer><span id="note">Off · tick to enable here</span><label><input id="on" type="checkbox"> On this site</label></footer>
+<header>
+  <h1>Wide Chat</h1>
+  <span id="host"></span>
+</header>
+
+<div class="stage">
+  <div class="col" id="col" aria-hidden="true"><i></i><i></i><i></i></div>
+  <span id="pct" class="off">off</span>
+</div>
+
+<input id="range" type="range" min="30" max="100" step="1" value="90" aria-label="Column width, share of the window">
+
+<footer>
+  <span id="note">Stock layout</span>
+  <label class="switch"><input id="on" type="checkbox"><span class="track" aria-hidden="true"></span><b>On this site</b></label>
+</footer>
 <script src="popup.js"></script>
+</html>
