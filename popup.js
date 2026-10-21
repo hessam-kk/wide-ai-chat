@@ -15,7 +15,6 @@ const STOCK = 42;
 const paint = () => {
   const on = onBox.checked;
   const pct = +range.value;
-  range.disabled = !on;
   document.body.classList.toggle('off', !on);
   pctEl.textContent = on ? pct + '%' : 'off';
   pctEl.classList.toggle('off', !on);
@@ -36,6 +35,7 @@ onBox.onchange = async () => {
 };
 
 range.oninput = () => {
+  onBox.checked = true; // dragging is a way to turn the site on
   paint();
   send({ type: 'set', pct: +range.value });
 };
