@@ -63,18 +63,16 @@ function check(el) {
 }
 
 function settle() {
-  const root = document.querySelector('main') || document.body;
+  const root = document.body;
   if (!pct || !root || !widest || !widest.el.isConnected) return;
   if (!root.querySelector('[data-wide-col]')) widen(widest.el, widest.cs, true);
 }
 
 function scan() {
-  const root = document.querySelector('main') || document.body;
+  const root = document.body;
   if (!root || !pct) return;
   for (const el of touched) if (!el.isConnected) touched.delete(el);
   widest = null;
-  // the cap sometimes sits on the root itself or on a wrapper just above it
-  for (let el = root; el && el !== document.documentElement; el = el.parentElement) check(el);
   for (const el of root.querySelectorAll(SEL)) check(el);
   settle();
 }
