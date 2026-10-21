@@ -28,8 +28,9 @@ const sandbox = {
 vm.createContext(sandbox);
 vm.runInContext(readFileSync(`${__dirname}/content.js`, 'utf8'), sandbox);
 
-const { isColumn } = sandbox;
+const { isColumn, isPaddedBand } = sandbox;
 assert.equal(typeof isColumn, 'function', 'isColumn not reachable');
+assert.equal(typeof isPaddedBand, 'function', 'isPaddedBand not reachable');
 
 const box = (left, width, height = 800) => ({ left, right: left + width, width, height });
 const main = box(0, 1600);
@@ -42,4 +43,10 @@ assert.equal(isColumn(1600, box(0, 1600), main, 1600), false, 'cap wider than vi
 // offset turn inside an already-widened column: gutter shifts it off-center
 assert.equal(isColumn(760, box(56, 760), main, 1600, false), true, 'gutter-offset turn inside a column');
 
-console.log('ok — column detector, 6 cases');
+// DeepSeek: 1400px band, 300px symmetric padding, 800px of text, no max-width
+const band = { left: 0, right: 1400, width: 1400, height: 1925 };
+assert.equal(isPaddedBand(300, 300, band, 1600), true, 'symmetrically padded band is a column');
+assert.equal(isPaddedBand(16, 16, band, 1600), false, 'normal padding left alone');
+assert.equal(isPaddedBand(300, 0, band, 1600), false, 'one-sided padding is not centring');
+
+console.log('ok — detector, 9 cases');
