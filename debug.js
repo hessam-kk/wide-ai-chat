@@ -27,7 +27,7 @@
       padL: cs.paddingLeft,
       offCenter: p ? Math.round((r.left + r.right) / 2 - (p.left + p.right) / 2) : null,
       capBinds: capped && Math.abs(r.width - mw) <= 60,
-      ours: el.dataset.wideCol || el.style.maxWidth || '',
+      ours: el.dataset.wc || '',
     });
   }
   rows.sort((a, b) => b.rectW - a.rectW);
