@@ -75,6 +75,9 @@
   #range:disabled { cursor: default; }
   #range:disabled::-webkit-slider-runnable-track { background: var(--line); }
   #range:disabled::-webkit-slider-thumb { background: #b9bdc9; }
+  /* off, but still live: dragging it is how you turn the site on */
+  body.off #range::-webkit-slider-runnable-track { background: var(--line); }
+  body.off #range::-webkit-slider-thumb { background: #565b6b; }
 
   footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
   #note { font-size: 11px; color: var(--mute); }
