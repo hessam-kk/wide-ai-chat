@@ -62,13 +62,22 @@ assert.equal(isPaddedBand(300, 300, band, 1600), true, 'symmetrically padded ban
 assert.equal(isPaddedBand(16, 16, band, 1600), false, 'normal padding left alone');
 assert.equal(isPaddedBand(300, 0, band, 1600), false, 'one-sided padding is not centring');
 
-// Overrides ride in one stylesheet, so reset has nothing of the site's to undo.
+// Nothing applies until a site is ticked on; the sheet is the only override.
 const sheets = () => sandbox.document.adoptedStyleSheets;
-sandbox.paint();
+const ask = (msg) => {
+  let reply;
+  box.listener(msg, null, (r) => (reply = r));
+  return reply;
+};
+
+assert.equal(ask({ type: 'get' }).pct, 0, 'a site starts off');
+assert.equal(sheets().length, 0, 'no stylesheet before opt-in');
+assert.equal(ask({ type: 'set', pct: '75' }).pct, 75, 'ticking on stores the width');
 assert.equal(sheets().length, 1, 'stylesheet installed');
-assert.match(sheets()[0].css, /^\[data-wc~="w"\]\{max-width:90vw!important\}/, 'rule follows the slider');
-sandbox.paint();
-assert.equal(sheets().length, 1, 'paint is idempotent');
+assert.match(sheets()[0].css, /^\[data-wc~="w"\]\{max-width:75vw!important\}/, 'rule follows the slider');
+assert.equal(ask({ type: 'set', pct: '80' }).pct, 80, 'slider updates');
+assert.equal(sheets().length, 1, 'set reuses the sheet');
+assert.match(sheets()[0].css, /max-width:80vw/, 'one rule rewritten, no per-element work');
 
 const el = { dataset: {} };
 sandbox.mark(el, 'pad');
@@ -76,11 +85,9 @@ sandbox.mark(el, 'w');
 sandbox.mark(el, 'w');
 assert.equal(el.dataset.wc, 'pad w', 'tokens accumulate once');
 
-let reply;
-box.listener({ type: 'reset' }, null, (r) => (reply = r));
-assert.equal(reply.pct, 0, 'reset reports off');
-assert.equal(sheets().length, 0, 'reset removes the stylesheet');
+assert.equal(ask({ type: 'reset' }).pct, 0, 'unticking reports off');
+assert.equal(sheets().length, 0, 'unticking removes the stylesheet');
 sandbox.paint();
-assert.equal(sheets().length, 0, 'stays off until the slider moves');
+assert.equal(sheets().length, 0, 'stays off until the site is ticked on');
 
-console.log('ok - detector + reset, 18 cases');
+console.log('ok - detector + opt-in + reset, 23 cases');
