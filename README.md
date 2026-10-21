@@ -74,7 +74,7 @@ whenever you move the slider.
 | --- | --- |
 | `manifest.json` | MV3 shell: `storage` permission, popup, content script on `<all_urls>` |
 | `content.js` | Detector, overrides, per-site state — the whole extension |
-| `popup.html` / `popup.js` | Per-site opt-in and slider; talks to the tab's content script |
+| `popup.html` / `popup.js` | Per-site opt-in, width slider and a live column preview; talks to the tab's content script |
 | `test.js` | Node self-check for the detector predicate |
 | `debug.js` | Paste-in-DevTools dump, for showing me why one site resists |
 
