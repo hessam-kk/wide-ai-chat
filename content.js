@@ -34,6 +34,12 @@ function widen(el, cs, isCol) {
 // Fallback anchor for threads that are not centred (DeepSeek aligns it left).
 let widest = null;
 
+// Centred by equal padding on both sides rather than a cap — DeepSeek pads with
+// calc((100% - var(--message-list-max-width)) / 2) and sets no max-width at all.
+function isPaddedBand(pad, padR, r, vw) {
+  return pad > 40 && Math.abs(pad - padR) < 8 && r.width - pad - padR < vw * 0.9 && r.height > 200;
+}
+
 function check(el) {
   if (!pct || touched.has(el)) return;
   // Inside a known column a cap is that turn's own gutter, and such turns are
@@ -46,14 +52,18 @@ function check(el) {
   const mw = parseFloat(cs.maxWidth);
   if (isColumn(mw, r, p && p.getBoundingClientRect(), vw, !inside)) return widen(el, cs, !inside);
 
+  const pad = parseFloat(cs.paddingLeft);
+  if (isPaddedBand(pad, parseFloat(cs.paddingRight), r, vw)) {
+    trim(el);
+    if (r.height > 300) el.dataset.wideCol = '1'; // it is the content band: loosen below it
+    return;
+  }
+
   const binds = mw >= 320 && mw < vw * 0.98 && Math.abs(r.width - mw) <= 60;
   if (!inside) {
     if (binds && r.height > 300 && (!widest || r.width > widest.r.width)) widest = { el, cs, r };
     return;
   }
-  // padding, not a cap, can be what narrows the text
-  const pad = parseFloat(cs.paddingLeft);
-  if (pad > 40 && r.width - 2 * pad < r.width * 0.85) trim(el);
   // A fixed px width caps just as hard, it just lives in `width`, not `max-width`.
   const w = parseFloat(cs.width);
   if (w >= 320 && w < vw * 0.98 && Math.abs(r.width - w) <= 60) {
