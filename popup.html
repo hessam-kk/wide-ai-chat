@@ -6,15 +6,17 @@
   header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
   #pct { font: 600 18px/1 ui-monospace, monospace; }
   #host { margin-top: 2px; font-size: 11px; color: #888; overflow-wrap: anywhere; }
-  input { width: 100%; margin: 12px 0 6px; accent-color: #10a37f; }
+  #range { width: 100%; margin: 12px 0 8px; accent-color: #10a37f; }
   footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   #note { font-size: 11px; color: #888; }
-  button { font: inherit; font-size: 11px; padding: 3px 9px; border-radius: 6px;
-           border: 1px solid currentColor; background: none; color: inherit; cursor: pointer; opacity: .75; }
-  button:hover { opacity: 1; }
+  label { display: flex; align-items: center; gap: 5px; font-size: 11px; white-space: nowrap;
+          cursor: pointer; opacity: .85; }
+  label:hover { opacity: 1; }
+  #on { margin: 0; accent-color: #10a37f; }
+  label:has(#on:disabled) { opacity: .4; cursor: default; }
 </style>
-<header><strong>Wide Chat</strong><span id="pct">–</span></header>
+<header><strong>Wide Chat</strong><span id="pct">off</span></header>
 <div id="host"></div>
 <input id="range" type="range" min="60" max="100" step="1" value="90">
-<footer><span id="note">Per site · applies live</span><button id="reset" type="button">Reset</button></footer>
+<footer><span id="note">Off · tick to enable here</span><label><input id="on" type="checkbox"> On this site</label></footer>
 <script src="popup.js"></script>
