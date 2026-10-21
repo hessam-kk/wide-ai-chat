@@ -8,7 +8,11 @@ const sandbox = {
   innerWidth: 1600,
   document: {
     querySelector: () => null,
-    body: { querySelectorAll: () => [] },
+    body: {
+      querySelectorAll: () => [],
+      getBoundingClientRect: () => ({ left: 0, right: 0, width: 0, height: 0 }),
+      parentElement: null,
+    },
     addEventListener() {},
   },
   chrome: {
