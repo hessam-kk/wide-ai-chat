@@ -2,7 +2,7 @@
 // sites rename their classes constantly, so columns are found by geometry.
 const host = location.hostname;
 const SEL = 'div, section, article, ul, ol, p, pre';
-let pct = 90; // 0 = off (stock layout)
+let pct = 0; // 0 = off: a site does nothing until it is ticked on in the popup
 let widths = {};
 const touched = new Set(); // already handled: skip on rescan
 
@@ -160,7 +160,7 @@ const persist = () => {
 
 (async () => {
   ({ widths = {} } = await chrome.storage.sync.get('widths'));
-  pct = widths[host] ?? 90;
+  pct = widths[host] ?? 0; // opt-in: only sites you turned on are stored
   paint();
   scan();
   setTimeout(scan, 900); // SPAs mount the thread late
