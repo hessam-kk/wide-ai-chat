@@ -136,7 +136,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
     scan();
     reply({ host, pct });
   } else if (msg.type === 'set') {
-    pct = widths[host] = Math.min(100, Math.max(60, +msg.pct || 90));
+    pct = widths[host] = Math.min(100, Math.max(30, +msg.pct || 90));
     paint();
     scan();
     persist();
