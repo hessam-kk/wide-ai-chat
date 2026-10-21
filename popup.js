@@ -1,6 +1,7 @@
 const range = document.getElementById('range');
 const onBox = document.getElementById('on');
 const pctEl = document.getElementById('pct');
+const col = document.getElementById('col');
 const hostEl = document.getElementById('host');
 const note = document.getElementById('note');
 
@@ -8,10 +9,19 @@ let tab = null;
 
 const send = (msg) => (tab ? chrome.tabs.sendMessage(tab.id, msg).catch(() => null) : Promise.resolve(null));
 
+// A stock chat column, as a share of the stage: what "off" looks like.
+const STOCK = 42;
+
 const paint = () => {
-  range.disabled = !onBox.checked; // the tick is the only way in
-  pctEl.textContent = onBox.checked ? range.value + '%' : 'off';
-  note.textContent = onBox.checked ? 'Applies live - per site' : 'Off - tick to enable here';
+  const on = onBox.checked;
+  const pct = +range.value;
+  range.disabled = !on;
+  document.body.classList.toggle('off', !on);
+  pctEl.textContent = on ? pct + '%' : 'off';
+  pctEl.classList.toggle('off', !on);
+  col.style.width = (on ? pct : STOCK) + '%';
+  range.style.setProperty('--fill', (((pct - 30) / 70) * 100).toFixed(1) + '%');
+  note.textContent = on ? 'Saved for this site' : 'Stock layout';
 };
 
 // Ticking the site on is the opt-in, and the only way anything is ever applied.
@@ -36,7 +46,7 @@ paint();
   [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const r = await send({ type: 'get' });
   if (!r) {
-    hostEl.textContent = 'Not available on this page';
+    hostEl.textContent = 'Not available here';
     note.textContent = 'Open a chat site, then click the icon again.';
     range.disabled = onBox.disabled = true;
     return;
