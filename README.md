@@ -27,14 +27,16 @@ column and moves the cap to where *you* want it, per site, live.
 1. Open `chrome://extensions`
 2. Toggle **Developer mode** (top right)
 3. **Load unpacked** → select this folder
-4. Pin **Wide Chat**, open a chat site, click the icon
+4. Pin **Wide Chat**, open a chat site, click the icon, tick **On this site**
 
 ## Use
 
 | Control | What it does |
 | --- | --- |
-| **Slider** `60–100%` | Column width as a share of the window. Saved per hostname, applied live. |
-| **Reset** | Removes every override and stores `off` for that site — stock layout, no page reload. Drag the slider to turn it back on. |
+| **On this site** | The opt-in. Off on every site until you tick it; nothing is ever applied without this. Remembered per hostname. |
+| **Slider** `60–100%` | Column width as a share of the window. Saved per hostname, applied live. Disabled while the site is off. |
+
+Unticking is the reset: the extension's stylesheet is dropped, so the page is back to stock instantly — no reload.
 
 ## How it works
 
@@ -72,7 +74,7 @@ whenever you move the slider.
 | --- | --- |
 | `manifest.json` | MV3 shell: `storage` permission, popup, content script on `<all_urls>` |
 | `content.js` | Detector, overrides, per-site state — the whole extension |
-| `popup.html` / `popup.js` | Slider and reset; talks to the tab's content script |
+| `popup.html` / `popup.js` | Per-site opt-in and slider; talks to the tab's content script |
 | `test.js` | Node self-check for the detector predicate |
 | `debug.js` | Paste-in-DevTools dump, for showing me why one site resists |
 
@@ -80,24 +82,24 @@ whenever you move the slider.
 
 ```console
 $ node test.js
-ok — detector + reset, 18 cases
+ok — detector + opt-in + reset, 23 cases
 ```
 
 ## Privacy
 
 Widths live in `chrome.storage.sync`, keyed by hostname. No network requests, no
 analytics, no reading of message content — the script only compares layout
-numbers and sets CSS. Runs on every page, changes only what looks like a capped
-chat column.
+numbers and sets CSS. Off by default everywhere: it touches nothing until you tick
+that site on, so non-chat pages are left alone entirely.
 
 ## Known limits
 
 - Caps expressed in `%` are left alone — they already scale with the window.
 - `flex-basis` caps are not touched; that needs a real selector.
 - A centred, capped *card* that isn't chat (welcome panel, modal) can widen too.
-  **Reset** or a reload restores it instantly.
+  **Untick On this site** or a reload restores it instantly.
 - Tables keep their own horizontal scroll, on purpose.
-- Reset drops the extension's stylesheet outright, so the page is exactly stock — there is no per-element undo to get wrong.
+- Unticking drops the extension's stylesheet outright, so the page is exactly stock — there is no per-element undo to get wrong (sites rewrite their own inline padding, so snapshots of it go stale).
 
 ## Licence
 
