@@ -5,6 +5,7 @@ const SEL = 'div, section, article, ul, ol, p, pre';
 let pct = 90; // 0 = off (stock layout)
 let widths = {};
 const touched = new Set();
+const trimmed = new Set();
 
 // A column is a box whose own max-width cap is what binds its width, and
 // (unless `centered` is off) sits centered inside its parent.
@@ -16,16 +17,22 @@ function isColumn(mw, r, parent, vw, centered = true) {
   return !!parent && Math.abs((r.left + r.right) / 2 - (parent.left + parent.right) / 2) < 48;
 }
 
+function trim(el) {
+  el.style.setProperty('padding-left', '16px', 'important');
+  el.style.setProperty('padding-right', '16px', 'important');
+  trimmed.add(el);
+}
+
 function widen(el, cs, isCol) {
   el.style.setProperty('max-width', pct + 'vw', 'important');
   // fat horizontal padding is the other half of the gap on some layouts
-  if (parseFloat(cs.paddingLeft) > 20) {
-    el.style.setProperty('padding-left', '16px', 'important');
-    el.style.setProperty('padding-right', '16px', 'important');
-  }
+  if (parseFloat(cs.paddingLeft) > 20) trim(el);
   touched.add(el);
   if (isCol) el.dataset.wideCol = '1'; // marks a chat column for the loose pass below
 }
+
+// Fallback anchor for threads that are not centred (DeepSeek aligns it left).
+let widest = null;
 
 function check(el) {
   if (!pct || touched.has(el)) return;
@@ -36,22 +43,40 @@ function check(el) {
   const cs = getComputedStyle(el);
   const r = el.getBoundingClientRect();
   const vw = innerWidth;
-  if (isColumn(parseFloat(cs.maxWidth), r, p && p.getBoundingClientRect(), vw, !inside)) {
-    widen(el, cs, !inside);
-  } else if (inside) {
-    // A fixed px width caps just as hard, it just lives in `width`, not `max-width`.
-    const w = parseFloat(cs.width);
-    if (!(w >= 320 && w < vw * 0.98) || Math.abs(r.width - w) > 60) return;
+  const mw = parseFloat(cs.maxWidth);
+  if (isColumn(mw, r, p && p.getBoundingClientRect(), vw, !inside)) return widen(el, cs, !inside);
+
+  const binds = mw >= 320 && mw < vw * 0.98 && Math.abs(r.width - mw) <= 60;
+  if (!inside) {
+    if (binds && r.height > 300 && (!widest || r.width > widest.r.width)) widest = { el, cs, r };
+    return;
+  }
+  // padding, not a cap, can be what narrows the text
+  const pad = parseFloat(cs.paddingLeft);
+  if (pad > 40 && r.width - 2 * pad < r.width * 0.85) trim(el);
+  // A fixed px width caps just as hard, it just lives in `width`, not `max-width`.
+  const w = parseFloat(cs.width);
+  if (w >= 320 && w < vw * 0.98 && Math.abs(r.width - w) <= 60) {
     el.style.setProperty('width', 'auto', 'important');
     widen(el, cs, false);
   }
+}
+
+function settle() {
+  const root = document.querySelector('main') || document.body;
+  if (!pct || !root || !widest || !widest.el.isConnected) return;
+  if (!root.querySelector('[data-wide-col]')) widen(widest.el, widest.cs, true);
 }
 
 function scan() {
   const root = document.querySelector('main') || document.body;
   if (!root || !pct) return;
   for (const el of touched) if (!el.isConnected) touched.delete(el);
+  widest = null;
+  // the cap sometimes sits on the root itself or on a wrapper just above it
+  for (let el = root; el && el !== document.documentElement; el = el.parentElement) check(el);
   for (const el of root.querySelectorAll(SEL)) check(el);
+  settle();
 }
 
 // New markup (streamed turns, re-mounted messages, SPA nav) is checked on arrival.
@@ -66,6 +91,7 @@ function flush() {
     check(n);
     for (const el of n.querySelectorAll(SEL)) check(el);
   }
+  settle();
 }
 function queue(nodes) {
   for (const n of nodes) batch.add(n);
@@ -83,7 +109,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
     persist();
     reply({ pct });
   } else if (msg.type === 'reset') {
-    for (const el of touched) {
+    for (const el of [...touched, ...trimmed]) {
       el.style.removeProperty('max-width');
       el.style.removeProperty('width');
       el.style.removeProperty('padding-left');
@@ -91,6 +117,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
       el.removeAttribute('data-wide-col');
     }
     touched.clear();
+    trimmed.clear();
     widths[host] = pct = 0; // keep the off state so rescans stay quiet
     persist();
     reply({ pct });
