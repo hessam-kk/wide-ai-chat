@@ -57,6 +57,11 @@ gutter) and a fixed px `width` counts as a cap too, replaced with `width: auto`.
 If nothing passes the centred test at all, the widest capped block holding the
 thread becomes the anchor — DeepSeek aligns its conversation to the left.
 
+Some sites never cap at all and centre with **symmetric padding** instead
+(DeepSeek: `padding-inline: calc((100% - var(--message-list-max-width)) / 2)`).
+A tall band padded >40px on both sides is detected as a column and trimmed to
+16px, which is the whole fix there.
+
 New markup is checked as it arrives — streamed turns, messages re-mounted while
 scrolling, SPA navigation — plus full rescans at 0.9s and 3s, on resize, and
 whenever you move the slider.
