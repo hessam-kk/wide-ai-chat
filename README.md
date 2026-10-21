@@ -100,7 +100,8 @@ MIT — see [LICENSE](LICENSE). Do what you want with it.
 
 ## One site still resists?
 
-DevTools on that tab → **Elements** → click a paragraph that stayed narrow →
-**Console** → paste [`debug.js`](debug.js). It copies a table of every ancestor
-with the numbers the detector sees: `maxWidth`, `width`, `flexBasis`, the
-off-centre offset, and whether the extension had already touched it.
+DevTools on that tab → **Console** → paste [`debug.js`](debug.js). No
+element-picking: it copies a table of every capped, fixed-width or heavily
+padded box on the page with the numbers the detector reads — `maxWidth`,
+`width`, the off-centre offset, and whether the extension had already touched
+it (`ours`).
