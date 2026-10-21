@@ -80,7 +80,7 @@ whenever you move the slider.
 
 ```console
 $ node test.js
-ok — column detector, 6 cases
+ok — detector + reset, 18 cases
 ```
 
 ## Privacy
@@ -97,7 +97,7 @@ chat column.
 - A centred, capped *card* that isn't chat (welcome panel, modal) can widen too.
   **Reset** or a reload restores it instantly.
 - Tables keep their own horizontal scroll, on purpose.
-- Reset applies to what this session touched; a hard reload always restores stock.
+- Reset drops the extension's stylesheet outright, so the page is exactly stock — there is no per-element undo to get wrong.
 
 ## Licence
 
