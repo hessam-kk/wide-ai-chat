@@ -4,13 +4,14 @@
 
 **Your AI writes twelve sentences. Chrome shows them eight words wide.**
 
-A five-file Chrome extension that lifts the `max-width` cap on AI chat panels —
+A tiny Chrome extension that lifts the `max-width` cap on AI chat panels —
 no per-site selectors, nothing to fix when ChatGPT redesigns.
 
 ![Manifest V3](https://img.shields.io/badge/manifest-v3-blue?style=flat-square)
 ![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen?style=flat-square)
 ![Chrome](https://img.shields.io/badge/chrome-88%2B-4285F4?style=flat-square&logo=googlechrome&logoColor=white)
 ![Network](https://img.shields.io/badge/network-none-lightgrey?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
 </div>
 
@@ -53,6 +54,9 @@ Inside an already-matched column the rules relax, because nested caps are that
 turn's own gutter: centring is dropped (Gemini offsets each turn by an avatar
 gutter) and a fixed px `width` counts as a cap too, replaced with `width: auto`.
 
+If nothing passes the centred test at all, the widest capped block holding the
+thread becomes the anchor — DeepSeek aligns its conversation to the left.
+
 New markup is checked as it arrives — streamed turns, messages re-mounted while
 scrolling, SPA navigation — plus full rescans at 0.9s and 3s, on resize, and
 whenever you move the slider.
@@ -89,6 +93,10 @@ chat column.
   **Reset** or a reload restores it instantly.
 - Tables keep their own horizontal scroll, on purpose.
 - Reset applies to what this session touched; a hard reload always restores stock.
+
+## Licence
+
+MIT — see [LICENSE](LICENSE). Do what you want with it.
 
 ## One site still resists?
 
