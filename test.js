@@ -35,5 +35,7 @@ assert.equal(isColumn(768, box(0, 1600), main, 1600), false, 'uncapped full-widt
 assert.equal(isColumn(768, box(400, 768, 32), main, 1600), false, 'short chip untouched');
 assert.equal(isColumn(768, box(0, 768), main, 1600), false, 'left-aligned box untouched');
 assert.equal(isColumn(1600, box(0, 1600), main, 1600), false, 'cap wider than viewport ignored');
+// offset turn inside an already-widened column: gutter shifts it off-center
+assert.equal(isColumn(760, box(56, 760), main, 1600, false), true, 'gutter-offset turn inside a column');
 
-console.log('ok — column detector, 5 cases');
+console.log('ok — column detector, 6 cases');
