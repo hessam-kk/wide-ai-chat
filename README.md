@@ -34,7 +34,7 @@ column and moves the cap to where *you* want it, per site, live.
 | Control | What it does |
 | --- | --- |
 | **On this site** | The opt-in. Off on every site until you tick it; nothing is ever applied without this. Remembered per hostname. |
-| **Slider** `60–100%` | Column width as a share of the window. Saved per hostname, applied live. Disabled while the site is off. |
+| **Slider** `30–100%` | Column width as a share of the window. Saved per hostname, applied live. Disabled while the site is off. |
 
 Unticking is the reset: the extension's stylesheet is dropped, so the page is back to stock instantly — no reload.
 
@@ -82,7 +82,7 @@ whenever you move the slider.
 
 ```console
 $ node test.js
-ok — detector + opt-in + reset, 23 cases
+ok — detector + opt-in + reset, 25 cases
 ```
 
 ## Privacy
