@@ -78,6 +78,8 @@ assert.match(sheets()[0].css, /^\[data-wc~="w"\]\{max-width:75vw!important\}/, '
 assert.equal(ask({ type: 'set', pct: '80' }).pct, 80, 'slider updates');
 assert.equal(sheets().length, 1, 'set reuses the sheet');
 assert.match(sheets()[0].css, /max-width:80vw/, 'one rule rewritten, no per-element work');
+assert.equal(ask({ type: 'set', pct: '10' }).pct, 30, 'below range clamps to 30');
+assert.equal(ask({ type: 'set', pct: '150' }).pct, 100, 'above range clamps to 100');
 
 const el = { dataset: {} };
 sandbox.mark(el, 'pad');
@@ -90,4 +92,4 @@ assert.equal(sheets().length, 0, 'unticking removes the stylesheet');
 sandbox.paint();
 assert.equal(sheets().length, 0, 'stays off until the site is ticked on');
 
-console.log('ok - detector + opt-in + reset, 23 cases');
+console.log('ok - detector + opt-in + reset, 25 cases');
