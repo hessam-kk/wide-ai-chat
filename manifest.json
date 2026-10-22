@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Wide AI Chat",
-  "version": "1.6.2",
+  "version": "1.7.2",
   "description": "Lifts the max-width cap on AI chat columns so answers use the full screen.",
   "permissions": ["storage"],
   "action": { "default_popup": "popup.html", "default_title": "Wide AI Chat" },

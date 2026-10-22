@@ -92,7 +92,7 @@ four runtime files (`manifest.json`, `content.js`, `popup.html`, `popup.js`) as
 - every push to `main` uploads that zip as a workflow artifact
 - pushing a tag `v<version>` attaches it to a GitHub release
 
-The tag has to equal the manifest version (`v1.6.2` ⇄ `"version": "1.6.2"`), so a
+The tag has to equal the manifest version (`v1.7.2` ⇄ `"version": "1.7.2"`), so a
 release can never ship a stale number.
 ## Test
 
