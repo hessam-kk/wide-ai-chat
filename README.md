@@ -1,6 +1,6 @@
 <div align="center">
 
-# Wide Chat
+# Wide AI Chat
 
 **Your AI writes twelve sentences. Chrome shows them eight words wide.**
 
@@ -19,7 +19,7 @@ no per-site selectors, nothing to fix when ChatGPT redesigns.
 
 ChatGPT, Gemini, DeepSeek and friends all wrap the conversation in a centred
 column capped around `48rem`. On a wide monitor that leaves half the screen
-empty and turns every answer into a tall, narrow ribbon. Wide Chat finds that
+empty and turns every answer into a tall, narrow ribbon. Wide AI Chat finds that
 column and moves the cap to where *you* want it, per site, live.
 
 ## Install
@@ -27,7 +27,7 @@ column and moves the cap to where *you* want it, per site, live.
 1. Open `chrome://extensions`
 2. Toggle **Developer mode** (top right)
 3. **Load unpacked** → select this folder
-4. Pin **Wide Chat**, open a chat site, click the icon, tick **On this site**
+4. Pin **Wide AI Chat**, open a chat site, click the icon, tick **On this site**
 
 ## Use
 
