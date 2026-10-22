@@ -83,6 +83,17 @@ whenever you move the slider.
 | `debug.js` | Paste-in-DevTools dump, for showing me why one site resists |
 | `assets/popup.png` | The popup screenshot above |
 
+## Build
+
+Nothing to install: `.github/workflows/build.yml` runs `node test.js`, then zips the
+four runtime files (`manifest.json`, `content.js`, `popup.html`, `popup.js`) as
+`wide-ai-chat-<manifest version>.zip`.
+
+- every push to `main` uploads that zip as a workflow artifact
+- pushing a tag `v<version>` attaches it to a GitHub release
+
+The tag has to equal the manifest version (`v1.6.1` ⇄ `"version": "1.6.1"`), so a
+release can never ship a stale number.
 ## Test
 
 ```console
