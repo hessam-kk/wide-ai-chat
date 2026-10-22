@@ -100,6 +100,13 @@
   .switch input:disabled + .track { opacity: .45; }
   .switch b { font-weight: 500; font-size: 11px; }
 
+  .repo {
+    display: block; margin-top: 14px; padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font: 500 10px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+    color: var(--mute); text-decoration: none; letter-spacing: .01em;
+  }
+  .repo:hover { color: var(--ink); }
   @media (prefers-reduced-motion: reduce) {
     * { transition-duration: 1ms !important; }
   }
@@ -120,5 +127,6 @@
   <span id="note">Stock layout</span>
   <label class="switch"><input id="on" type="checkbox"><span class="track" aria-hidden="true"></span><b>On this site</b></label>
 </footer>
+<a class="repo" href="https://github.com/hessam-kk/wide-ai-chat" target="_blank" rel="noreferrer">github.com/hessam-kk/wide-ai-chat</a>
 <script src="popup.js"></script>
 </html>
