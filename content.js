@@ -1,4 +1,4 @@
-// Wide Chat — lifts the max-width cap on chat columns. No per-site selectors:
+// Wide AI Chat — lifts the max-width cap on chat columns. No per-site selectors:
 // sites rename their classes constantly, so columns are found by geometry.
 const host = location.hostname;
 const SEL = 'div, section, article, ul, ol, p, pre';
