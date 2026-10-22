@@ -13,6 +13,10 @@ no per-site selectors, nothing to fix when ChatGPT redesigns.
 ![Network](https://img.shields.io/badge/network-none-lightgrey?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
+<br>
+
+<img src="assets/popup.png" width="288" alt="The Wide AI Chat popup: a mini viewport showing the chat column and the gutters it reclaims, a width rail and an On this site switch">
+
 </div>
 
 ---
@@ -75,8 +79,9 @@ whenever you move the slider.
 | `manifest.json` | MV3 shell: `storage` permission, popup, content script on `<all_urls>` |
 | `content.js` | Detector, overrides, per-site state — the whole extension |
 | `popup.html` / `popup.js` | Per-site opt-in, width slider and a live column preview; talks to the tab's content script |
-| `test.js` | Node self-check for the detector predicate |
+| `test.js` | Node self-check: detector, opt-in and reset |
 | `debug.js` | Paste-in-DevTools dump, for showing me why one site resists |
+| `assets/popup.png` | The popup screenshot above |
 
 ## Test
 
